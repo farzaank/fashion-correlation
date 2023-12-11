@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scatterplot Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        /* Add your CSS styling here */
+    </style>
+</head>
+<body>
+    <div>
+        <label><input type="checkbox" id="filterES"> Hide SMBs</label>
+        <label><input type="checkbox" id="filterGOY"> Hide Major Companies</label>
+        <button id="swapAxes">Swap Axes</button>
+    </div>
+    <div id="tooltip" style="position: absolute; visibility: hidden; background-color: lightgrey; padding: 8px; border-radius: 4px;"></div>
+
+    <svg id="scatterplot"></svg>
+
+    <script>
+
+const tooltip = d3.select("#tooltip");
+
+// Sample dataset - replace this with your actual dataset
+const dataset = [{"company":"Amazon","url":"www.amazon.com","overallRating":"0*","envRating":"0*","ethRating":"0*","confidence":"9.3","id":887,"supported":false,"tags":["apparel"]},{"company":"Levi's","url":"www.levi.com","overallRating":"5.85","envRating":"8.95","ethRating":"2.75","confidence":"8.9","id":794,"supported":false,"tags":["apparel"]},{"company":"UGG","url":"www.ugg.com","overallRating":"6.5","envRating":"7.75","ethRating":"5.25","confidence":"8.9","id":799,"supported":false,"tags":["apparel"]},{"company":"Parker Clay","url":"www.parkerclay.com","overallRating":"5.4","envRating":"7.55","ethRating":"8.25","confidence":"8.6","id":988,"supported":false,"tags":["apparel"]},{"company":"Timberland","url":"www.timberland.com","overallRating":"5.75","envRating":"6.25","ethRating":"5.25","confidence":"8.6","id":805,"supported":false,"tags":["apparel"]},{"company":"Bottega Veneta","url":"www.bottegaveneta.com","overallRating":"6.22","envRating":"8.95","ethRating":"3.5","confidence":"8.6","id":789,"supported":false,"tags":["apparel"]},{"company":"Marni","url":"www.marni.com","overallRating":"0*","envRating":"1.15","ethRating":"0*","confidence":"8.5","id":893,"supported":false,"tags":["apparel"]},{"company":"Lands' End","url":"www.landsend.com","overallRating":"0*","envRating":"1.55","ethRating":"0*","confidence":"8.5","id":839,"supported":false,"tags":["apparel"]},{"company":"Bloomingdale's","url":"www.bloomingdales.com","overallRating":"0*","envRating":"1.15","ethRating":"0*","confidence":"8.5","id":922,"supported":false,"tags":["apparel"]},{"company":"tentree","url":"www.tentree.com","overallRating":"8.75","envRating":"10*","ethRating":"3.75","confidence":"8.4","id":966,"supported":false,"tags":["apparel"]},{"company":"Fashion Nova","url":"www.fashionnova.com","overallRating":"0*","envRating":"0*","ethRating":"0*","confidence":"8.4","id":916,"supported":false,"tags":["apparel"]},{"company":"Teemill","url":"teemill.com","overallRating":"9.72","envRating":"10*","ethRating":"8.0","confidence":"8.4","id":1005,"supported":false,"tags":["apparel"]},{"company":"Wolven","url":"wolventhreads.com","overallRating":"8.75","envRating":"10*","ethRating":"3.75","confidence":"8.4","id":959,"supported":false,"tags":["apparel"]},{"company":"Patagonia","url":"www.patagonia.com","overallRating":"5.75","envRating":"8.75","ethRating":"2.75","confidence":"8.3","id":934,"supported":false,"tags":["apparel"]},{"company":"Hermès","url":"www.hermes.com","overallRating":"5.25","envRating":"7.0","ethRating":"3.5","confidence":"8.3","id":801,"supported":false,"tags":["apparel"]},{"company":"Burberry","url":"us.burberry.com","overallRating":"5.22","envRating":"7.95","ethRating":"2.5","confidence":"8.3","id":798,"supported":false,"tags":["apparel"]},{"company":"Lululemon","url":"shop.lululemon.com","overallRating":"3.0","envRating":"5.75","ethRating":"0.25","confidence":"8.3","id":820,"supported":false,"tags":["apparel"]},{"company":"Puma","url":"us.puma.com","overallRating":"6.47","envRating":"7.95","ethRating":"5.0","confidence":"8.3","id":786,"supported":false,"tags":["apparel"]},{"company":"Roxy","url":"www.roxy.com","overallRating":"1.45","envRating":"3.65","ethRating":"0*","confidence":"8.1","id":931,"supported":false,"tags":["apparel"]},{"company":"Colorful Standard","url":"colorfulstandard.com","overallRating":"7.75","envRating":"10*","ethRating":"4.75","confidence":"8.1","id":962,"supported":false,"tags":["apparel"]},{"company":"MATE the Label","url":"matethelabel.com","overallRating":"8.5","envRating":"10*","ethRating":"4.75","confidence":"8.1","id":1007,"supported":false,"tags":["apparel"]},{"company":"No Nasties","url":"www.nonasties.in","overallRating":"9.25","envRating":"10*","ethRating":"7.25","confidence":"8.1","id":1046,"supported":false,"tags":["apparel"]},{"company":"unspun","url":"www.unspun.io","overallRating":"8.05","envRating":"10*","ethRating":"4.75","confidence":"8.1","id":1045,"supported":false,"tags":["apparel"]},{"company":"HEMA","url":"www.hema.com","overallRating":"1.52","envRating":"0.55","ethRating":"2.5","confidence":"8.0","id":939,"supported":false,"tags":["apparel"]},{"company":"Stradivarius","url":"www.stradivarius.com","overallRating":"2.12","envRating":"1.75","ethRating":"2.5","confidence":"8.0","id":779,"supported":false,"tags":["apparel"]},{"company":"Gucci","url":"www.gucci.com","overallRating":"6.42","envRating":"7.85","ethRating":"5.0","confidence":"8.0","id":783,"supported":false,"tags":["apparel"]},{"company":"Everlane","url":"www.everlane.com","overallRating":"5.2","envRating":"5.65","ethRating":"4.75","confidence":"8.0","id":1060,"supported":false,"tags":["apparel"]},{"company":"Abercrombie \u0026 Fitch","url":"www.abercrombie.com","overallRating":"2.4","envRating":"3.05","ethRating":"1.75","confidence":"8.0","id":852,"supported":false,"tags":["apparel"]},{"company":"Icebreaker","url":"www.icebreaker.com","overallRating":"5.8","envRating":"6.35","ethRating":"5.25","confidence":"8.0","id":996,"supported":false,"tags":["apparel"]},{"company":"NAADAM","url":"naadam.co","overallRating":"4.15","envRating":"4.55","ethRating":"3.75","confidence":"8.0","id":1013,"supported":false,"tags":["apparel"]},{"company":"Dr. Martens","url":"www.drmartens.com","overallRating":"2.52","envRating":"3.55","ethRating":"1.5","confidence":"8.0","id":796,"supported":false,"tags":["apparel"]},{"company":"Coalatree","url":"coalatree.com","overallRating":"6.25","envRating":"8.75","ethRating":"3.75","confidence":"8.0","id":981,"supported":false,"tags":["apparel"]},{"company":"Fruit of the Loom","url":"www.fruit.com","overallRating":"6.38","envRating":"9.25","ethRating":"3.5","confidence":"8.0","id":844,"supported":false,"tags":["apparel"]},{"company":"Koio","url":"www.koio.co","overallRating":"4.4","envRating":"4.05","ethRating":"4.75","confidence":"8.0","id":979,"supported":false,"tags":["apparel"]},{"company":"Marks \u0026 Spencer","url":"www.marks.com","overallRating":"5.97","envRating":"7.95","ethRating":"4","confidence":"8.0","id":860,"supported":false,"tags":["apparel"]},{"company":"Balenciaga","url":"www.balenciaga.com","overallRating":"5.67","envRating":"7.85","ethRating":"3.5","confidence":"8.0","id":790,"supported":false,"tags":["apparel"]},{"company":"Pull\u0026Bear","url":"www.merriam-webster.com","overallRating":"3.12","envRating":"1.75","ethRating":"4.5","confidence":"8.0","id":781,"supported":false,"tags":["apparel"]},{"company":"PACT","url":"wearpact.com","overallRating":"4.9","envRating":"5.05","ethRating":"4.75","confidence":"8.0","id":957,"supported":false,"tags":["apparel"]},{"company":"Kotn","url":"kotn.com","overallRating":"7.75","envRating":"7.25","ethRating":"8.25","confidence":"8.0","id":960,"supported":false,"tags":["apparel"]},{"company":"Marimekko","url":"www.marimekko.com","overallRating":"4.7","envRating":"4.65","ethRating":"4.75","confidence":"8.0","id":982,"supported":false,"tags":["apparel"]},{"company":"Mammut","url":"www.mammut.com","overallRating":"5.67","envRating":"7.85","ethRating":"3.5","confidence":"8.0","id":838,"supported":false,"tags":["apparel"]},{"company":"H\u0026M","url":"hm.com","overallRating":"4.62","envRating":"3.25","ethRating":"6.0","confidence":"8.0","id":788,"supported":false,"tags":["apparel"]},{"company":"REVOLVE","url":"www.revolve.com","overallRating":"2.65","envRating":"1.55","ethRating":"3.75","confidence":"8.0","id":891,"supported":false,"tags":["apparel"]},{"company":"Champion","url":"www.champion.com","overallRating":"1.45","envRating":"2.65","ethRating":"0.25","confidence":"8.0","id":848,"supported":false,"tags":["apparel"]},{"company":"Chloé","url":"www.chloe.com","overallRating":"3.5","envRating":"6.25","ethRating":"0.75","confidence":"8.0","id":802,"supported":false,"tags":["apparel"]},{"company":"Ralph Lauren","url":"www.ralphlauren.com","overallRating":"5.47","envRating":"7.45","ethRating":"3.5","confidence":"8.0","id":793,"supported":false,"tags":["apparel"]},{"company":"Saint Laurent","url":"www.ysl.com","overallRating":"5.67","envRating":"7.85","ethRating":"3.5","confidence":"8.0","id":780,"supported":false,"tags":["apparel"]},{"company":"Vans","url":"www.vans.com","overallRating":"6.12","envRating":"6.25","ethRating":"6.0","confidence":"8.0","id":804,"supported":false,"tags":["apparel"]},{"company":"Panafrica","url":"panafrica-store.com","overallRating":"4.9","envRating":"5.05","ethRating":"4.75","confidence":"8.0","id":1052,"supported":false,"tags":["apparel"]},{"company":"Save the Duck","url":"www.savetheduck.com","overallRating":"6.3","envRating":"8.85","ethRating":"3.75","confidence":"8.0","id":1027,"supported":false,"tags":["apparel"]},{"company":"SHEIN","url":"us.shein.com","overallRating":"0*","envRating":"0.4","ethRating":"0*","confidence":"7.9","id":930,"supported":false,"tags":["apparel"]},{"company":"KiK","url":"www.kik.de","overallRating":"0*","envRating":"1.65","ethRating":"0*","confidence":"7.9","id":937,"supported":false,"tags":["apparel"]},{"company":"La Redoute","url":"www.laredoute.com","overallRating":"0*","envRating":"3.25","ethRating":"0*","confidence":"7.9","id":936,"supported":false,"tags":["apparel"]},{"company":"Knickey","url":"knickey.com","overallRating":"8.8","envRating":"10*","ethRating":"7.25","confidence":"7.8","id":995,"supported":false,"tags":["apparel"]},{"company":"DKNY","url":"www.dkny.com","overallRating":"0.2","envRating":"1.15","ethRating":"0*","confidence":"7.8","id":920,"supported":false,"tags":["apparel"]},{"company":"Outland Denim","url":"www.outlanddenim.com","overallRating":"9.62","envRating":"10*","ethRating":"8.0","confidence":"7.8","id":1035,"supported":false,"tags":["apparel"]},{"company":"L.L.Bean","url":"www.llbean.com","overallRating":"2.0","envRating":"4.25","ethRating":"0*","confidence":"7.8","id":913,"supported":false,"tags":["apparel"]}]
+
+
+function linearRegression(data) {
+    let n = data.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    data.forEach(d => {
+        sumX += Number(d.envRating.replace("*", ""));
+        sumY += Number(d.ethRating.replace("*", ""));
+        sumXY += Number(d.envRating.replace("*", "")) * Number(d.ethRating.replace("*", ""));
+        sumX2 += Number(d.envRating.replace("*", "")) * Number(d.envRating.replace("*", ""));
+    });
+    let meanX = sumX / n;
+    let meanY = sumY / n;
+    let slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    let intercept = meanY - slope * meanX;
+    return { slope, intercept };
+}
+
+//let { slope, intercept } = linearRegression(dataset);
+
+const slope = 0.4786231816874038;
+const intercept= 0.6472801052272041;
+
+
+const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+const width = 600 - margin.left - margin.right;
+const height = 400 - margin.top - margin.bottom;
+
+const svg = d3.select("#scatterplot")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+const xScale = d3.scaleLinear()
+                 .domain([0, d3.max(dataset, d => Number(d.envRating.replace("*", "")))])
+                 .range([0, width]);
+
+const yScale = d3.scaleLinear()
+                 .domain([0, d3.max(dataset, d => Number(d.envRating.replace("*", "")))])
+                 .range([height, 0]);
+
+// Define the axes
+const xAxis = d3.axisBottom(xScale);
+const yAxis = d3.axisLeft(yScale);
+
+// Append the axes to the SVG
+svg.append("g")
+   .attr("transform", "translate(0," + height + ")")
+   .call(xAxis);
+
+svg.append("g")
+   .call(yAxis);
+
+
+
+let xAxisLabel = 'envRating';
+let yAxisLabel = 'ethRating';
+/*
+function swapAxes() {
+    // Swap the axis labels
+    [xAxisLabel, yAxisLabel] = [yAxisLabel, xAxisLabel];
+
+    // Update the scales
+    xScale.domain([0, d3.max(dataset, d => d[xAxisLabel])]);
+    yScale.domain([0, d3.max(dataset, d => d[yAxisLabel])]);
+
+    // Update the axes
+    svg.select(".x.axis")
+       .transition()
+       .duration(1000)
+       .call(d3.axisBottom(xScale));
+
+    svg.select(".y.axis")
+       .transition()
+       .duration(1000)
+       .call(d3.axisLeft(yScale));
+
+    // Update the scatterplot
+    updateScatterplot(dataset);
+
+    // Update the regression line
+    let { slope, intercept } = linearRegression(dataset);
+    drawLine(slope, intercept);
+}*/
+
+//d3.select("#swapAxes").on("click", swapAxes);
+
+function drawLine(slope, intercept) {
+    let line = d3.line()
+                .x(d => xScale(Number(d.envRating.replace("*",""))))
+                .y(d => yScale(slope * Number(d.envRating.replace("*",""))) + intercept);
+
+    svg.append("path")
+       .datum(dataset)
+       .attr("fill", "none")
+       .attr("stroke", "gray")
+       .attr("stroke-width", 2)
+       .attr("d", line);
+}
+
+
+// Function to update the scatterplot
+function updateScatterplot(data) {
+    const circles = svg.selectAll("circle")
+                       .data(data);
+
+    circles.enter()
+           .append("circle")
+           .merge(circles)
+           .attr("cx", d => xScale(Number(d[xAxisLabel].replace("*", ""))))
+           .attr("cy", d => yScale(Number(d[yAxisLabel].replace("*", ""))))
+           .attr("r", 5)
+           .attr("fill", () => `hsla(${Math.random() * 360}, 100%, 50%, 0.7)`) // Random color and translucency
+           .on("mouseover", (event, d) => {
+               // Show tooltip with name, env, and eth
+
+               tooltip.style("visibility", "visible")
+                      .html("Name: " + d.company + "<br>Env: " + Number(d.envRating.replace("*", "")) + "<br>Eth: " + Number(d.ethRating.replace("*", "")))
+                      .style("top", (event.pageY - 10) + "px")
+                      .style("left", (event.pageX + 10) + "px");
+           })
+           .on("mouseout", () => {
+               // Hide tooltip
+
+               tooltip.style("visibility", "hidden");
+           });
+
+    circles.exit().remove();
+
+    drawLine(slope, intercept);
+}
+
+updateScatterplot(dataset); // Initial scatterplot
+
+// Filter functionality
+function applyFilters() {
+    let filteredData = dataset;
+    if (d3.select("#filterES").property("checked")) {
+        filteredData = filteredData.filter(d => d.es);
+    }
+    if (d3.select("#filterGOY").property("checked")) {
+        filteredData = filteredData.filter(d => d.goy);
+    }
+    updateScatterplot(filteredData);
+}
+
+d3.select("#filterES").on("change", applyFilters);
+d3.select("#filterGOY").on("change", applyFilters);
+
+drawLine(slope, intercept);
+
+    </script>
+</body>
+</html>
